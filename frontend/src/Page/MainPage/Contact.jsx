@@ -15,7 +15,7 @@ const Contact = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-20">
-          {[
+          {[ //일단 더미
             {
               title: "전화 문의",
               info: "02-1234-5678",
