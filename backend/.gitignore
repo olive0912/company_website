@@ -9,6 +9,7 @@ pids
 *.pid
 *.seed
 *.pid.lock
+.env
 
 node_modules/
 jspm_packages/
