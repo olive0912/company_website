@@ -9,8 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "homepage": "https://olive0912.github.io/pages/"
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@react-icons/all-files": "^4.1.0",
