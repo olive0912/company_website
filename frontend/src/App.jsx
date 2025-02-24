@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Footer from './Components/Footer/Footer'
 import Navbar from './Components/Navbar/Navbar'
+import AdminNavbar from './Components/AdminNavbar/AdminNavbar'
+
 import { BrowserRouter } from 'react-router-dom';
 import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +14,11 @@ import Board from './Page/Board/Board';
 import Services from './Page/Services/Services';
 import Contact from './Page/Contact/Contact';
 import AdminLogin from './Page/Admin/AdminLogin';
+import AdminEditPost from './Page/Admin/AdminEditPost';
+import AdminContacts from './Page/Admin/AdminContacts';
+import AdminCreatePost from './Page/Admin/AdminCreatePost';
+import AdminPosts from './Page/Admin/AdminPosts';
+
 
 function AuthRedirectRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -41,6 +48,15 @@ function Layout() {//1
       <Navbar />
       <Outlet />
       <Footer />
+    </div>
+  );
+}
+
+function AdminLayout() {
+  return (
+    <div>
+      <AdminNavbar />
+      <Outlet />
     </div>
   );
 }
@@ -80,7 +96,29 @@ const router = createBrowserRouter([//2
   {
     path: '/admin',
     element: <AuthRedirectRoute />,
-    children: [{ index: true, element: <AdminLogin /> }]
+    children: [{ index: true, element: <AdminLogin /> }],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      {
+        path: 'posts',
+        element: <AdminPosts />
+      },
+      {
+        path: 'create-post',
+        element: <AdminCreatePost />
+      },
+      {
+        path: 'edit-post/:id',
+        element: <AdminEditPost />
+      },
+      {
+        path: 'contacts',
+        element: <AdminContacts />
+      },
+    ]
   }
 ]);
 
