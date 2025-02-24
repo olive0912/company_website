@@ -156,4 +156,23 @@ router.delete("/delete/:userId", async (req, res) => {
   }
 });
 
+router.post("/verify-token", (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res
+      .status(400)
+      .json({ isValid: false, message: "토큰이 존재하지 않습니다." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.status(200).json({ isValid: true, user: decoded });
+  } catch (error) {
+    return res
+      .status(401)
+      .json({ isValid: false, message: "토큰이 유효하지 않습니다." });
+  }
+});
+
 module.exports = router;
