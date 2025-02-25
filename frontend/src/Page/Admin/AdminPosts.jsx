@@ -132,7 +132,7 @@ const AdminPosts = () => {
                         key={post._id}
                         className="p-4 border rounded-lg bg-white shadow-md"
                     >
-                        <div className="flex justify-between items-cecnter mb-2">
+                        <div className="flex justify-between items-center mb-2">
                             <h2 className="text-lg font-bold">{post.title}</h2>
                             <span className="text-gray-500 text-sm">#{index + 1}</span>
                         </div>
