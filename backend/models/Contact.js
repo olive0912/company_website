@@ -8,7 +8,7 @@ const contactSchema = new mongoose.Schema(
       trim: true,
     },
     email: {
-      type: String, 
+      type: String,
       required: true,
       trim: true,
     },
@@ -24,13 +24,13 @@ const contactSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['in progress', 'pending', 'completed'],
-      default: 'in progress',
+      enum: ["in progress", "pending", "completed"],
+      default: "in progress",
     },
     createdAt: {
       type: Date,
       default: Date.now,
-    }
+    },
   },
   {
     timestamps: true,
