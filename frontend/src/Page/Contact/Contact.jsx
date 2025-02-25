@@ -1,6 +1,45 @@
 import React from 'react'
+import { useState } from 'react'
+import axios from 'axios';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+    status: 'in progress'
+  })
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post('http://localhost:3000/api/contact', formData);
+      if (response.status === 201) {
+        alert('문의가 성공적으로 접수되었습니다.')
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          message: '',
+          status: 'in progress',
+        })
+      }
+
+
+    } catch (error) {
+      console.log('에러가 발생하였습니다 잠시 후 다시 시도해주세요: ')
+      // console.log(error)
+    }
+  }
+
   return (
     <div className='min-h-screen bg-white py-32'>
       <div className='container mx-auto px-4 max-w-6xl'>
@@ -12,23 +51,23 @@ const Contact = () => {
         </div>
         <div className='grid lg:grid-cols-2 gap-12 items-start'>
           <div>
-            <form className='bg-white rounded-2xl shadow-xl p-8'>
+            <form className='bg-white rounded-2xl shadow-xl p-8' onSubmit={handleSubmit}>
               <div className='space-y-6'>
                 <div>
                   <label className='block text-gray-700 font-medium mb-2'>이름</label>
-                  <input type='text' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='성이름' required></input>
+                  <input type='text' name='name' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='성이름' required value={formData.name} onChange={handleChange}></input>
                 </div>
                 <div>
                   <label className='block text-gray-700 font-medium mb-2'>이메일</label>
-                  <input type='email' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='example@domain.com' required></input>
+                  <input type='email' name='email' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='example@domain.com' required value={formData.email} onChange={handleChange}></input>
                 </div>
                 <div>
                   <label className='block text-gray-700 font-medium mb-2'>전화번호</label>
-                  <input type='tel' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='010-0000-0000' required></input>
+                  <input type='tel' name='phone' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300' placeholder='010-0000-0000' required value={formData.phone} onChange={handleChange}></input>
                 </div>
                 <div>
                   <label className='block text-gray-700 font-medium mb-2'>문의 내용</label>
-                  <textarea className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300 h-40' placeholder='문의하실 내용을 자세히 적어주세요.' required />
+                  <textarea name='message' className='w-full p-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors duration-300 h-40' placeholder='문의하실 내용을 자세히 적어주세요.' required value={formData.message} onChange={handleChange} />
                 </div>
                 <button className='w-full bg-blue-600 text-white py-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-300'>문의하기</button>
               </div>
