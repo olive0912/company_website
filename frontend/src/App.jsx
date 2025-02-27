@@ -18,6 +18,7 @@ import AdminEditPost from './Page/Admin/AdminEditPost';
 import AdminContacts from './Page/Admin/AdminContacts';
 import AdminCreatePost from './Page/Admin/AdminCreatePost';
 import AdminPosts from './Page/Admin/AdminPosts';
+import SinglePost from './Page/SinglePost/SinglePost';
 
 
 function AuthRedirectRoute() {
@@ -106,6 +107,10 @@ const router = createBrowserRouter([//2
       {
         path: '/board',
         element: <Board />
+      },
+      {
+        path: '/post/:id',
+        element: <SinglePost />
       },
       {
         path: '/our-services',

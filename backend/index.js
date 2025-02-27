@@ -11,7 +11,12 @@ const contactRoutes = require("./routes/contact");
 const postRoutes = require("./routes/post");
 const uploadRoutes = require("./routes/upload");
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(
+  cors({
+    origin: "https://7578-221-152-26-100.ngrok-free.app", //와우
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
