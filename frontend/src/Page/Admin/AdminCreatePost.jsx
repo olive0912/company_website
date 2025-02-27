@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
@@ -16,13 +16,11 @@ const AdminCreatePost = () => {
   const [currentUpload, setCurrentUpload] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
-  const UploadModal = ({ progress, fileName }) =>
+  const UploadModal = ({ progress, fileName }) => (
     showUploadModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            파일 업로드 중...
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">파일 업로드 중...</h3>
           <p className="text-sm text-gray-600 mb-4">{fileName}</p>
           <div className="relative pt-1">
             <div className="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-gray-200">
@@ -37,7 +35,103 @@ const AdminCreatePost = () => {
           </div>
         </div>
       </div>
-    );
+    )
+  );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const editorContent = editorRef.current.getContent();
+    setShowUploadModal(true);
+
+    try {
+      const uploadedFiles = await Promise.all(
+        formData.files.map(async (file) => {
+          setCurrentUpload(file.name);
+          const fileFormData = new FormData();
+          const encodedFileName = encodeURIComponent(file.name);
+          fileFormData.append("file", file);
+          fileFormData.append("originalName", encodedFileName);
+
+          const response = await axios.post(
+            "http://localhost:3000/api/upload/file",
+            fileFormData,
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+              onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
+                setUploadProgress((prev) => ({
+                  ...prev,
+                  [file.name]: percentCompleted,
+                }));
+              },
+            }
+          );
+          return response.data.fileUrl;
+        })
+      );
+
+      const postData = {
+        title: formData.title,
+        content: editorContent,
+        fileUrl: uploadedFiles,
+      };
+
+      await axios.post(
+        "http://localhost:3000/api/post",
+        postData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setShowUploadModal(false);
+      navigate("/admin/posts");
+    } catch (error) {
+      console.error("Error creating post:", error);
+      setShowUploadModal(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+
+    const newFileList = newFiles.map((file) => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      size: file.size,
+      file: file,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      files: [...prev.files, ...newFiles],
+      fileList: [...prev.fileList, ...newFileList],
+    }));
+  };
+
+  const handleFileDelete = (fileId) => {
+    setFormData((prev) => ({
+      ...prev,
+      files: prev.files.filter((_, index) => prev.fileList[index].id !== fileId),
+      fileList: prev.fileList.filter((file) => file.id !== fileId),
+    }));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -46,7 +140,7 @@ const AdminCreatePost = () => {
           새 게시물 작성
         </h2>
 
-        <form className="space-y-4 sm:space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-8">
           <div>
             <label
               htmlFor="title"
@@ -61,16 +155,13 @@ const AdminCreatePost = () => {
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 text-base sm:text-lg p-2 sm:p-3"
+              className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base sm:text-lg p-2 sm:p-3"
               required
             />
           </div>
 
           <div>
-            <label
-              htmlFor="content"
-              className="block text-lg sm:text-xl font-medium text-gray-700 mb-2"
-            >
+            <label className="block text-lg sm:text-xl font-medium text-gray-700 mb-2">
               내용
             </label>
             <Editor
@@ -171,7 +262,14 @@ const AdminCreatePost = () => {
               type="file"
               id="files"
               multiple
-              className="mt-1 block w-full text-base sm:text-lg text-gray-500 file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-4 sm:file:px-6 file:rounded-lg file:border file:text-base sm:file:text-lg file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+              onChange={handleFileChange}
+              className="mt-1 block w-full text-base sm:text-lg text-gray-500
+                file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-4 sm:file:px-6
+                file:rounded-lg file:border-0
+                file:text-base sm:file:text-lg file:font-semibold
+                file:bg-indigo-50 file:text-indigo-700
+                hover:file:bg-indigo-100
+                cursor-pointer"
             />
 
             {formData.fileList.length > 0 && (
@@ -235,14 +333,14 @@ const AdminCreatePost = () => {
           <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-8">
             <button
               type="submit"
-              className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-white bg-blue-600 border-2 border-transparent rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none transition-all duration-300"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-white bg-indigo-600 border-2 border-transparent rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
             >
               저장
             </button>
             <button
               type="button"
               onClick={() => navigate("/admin/posts")}
-              className="w-full sm:w-auto sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none transition-all duration-300"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 text-base sm:text-lg font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200"
             >
               취소
             </button>
@@ -257,4 +355,4 @@ const AdminCreatePost = () => {
   );
 };
 
-export default AdminCreatePost; 
+export default AdminCreatePost;
